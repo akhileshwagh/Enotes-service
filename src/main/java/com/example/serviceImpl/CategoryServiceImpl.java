@@ -12,6 +12,7 @@ import org.springframework.util.ObjectUtils;
 import com.example.dto.CategoryDto;
 import com.example.dto.CategoryResponse;
 import com.example.entity.Category;
+import com.example.exception.ResourceNotFoundException;
 import com.example.repository.CategoryRepository;
 import com.example.service.CategoryService;
 
@@ -51,17 +52,16 @@ public class CategoryServiceImpl implements CategoryService {
 
 	private void updateCategory(Category category) {
 		Optional<Category> findById = categoryRepo.findById(category.getId());
-		if(findById.isPresent()) {
+		if (findById.isPresent()) {
 			Category existingCategory = findById.get();
 			category.setCreatedBy(existingCategory.getCreatedBy());
 			category.setCreatedOn(existingCategory.getCreatedOn());
 			category.setIsDeleted(existingCategory.getIsDeleted());
-			
+
 			category.setUpdatedBy(1);
 			category.setUpdatedOn(new Date());
 		}
 
-			
 	}
 
 	// <========get all category========>
@@ -73,7 +73,7 @@ public class CategoryServiceImpl implements CategoryService {
 		return categoryDtoList;
 	}
 
-	// <--------get only active category-------->
+	// <-------- get only active category -------->
 
 	@Override
 	public List<CategoryResponse> getActiveCategory() {
@@ -84,19 +84,23 @@ public class CategoryServiceImpl implements CategoryService {
 		return categoryList;
 	}
 
-	// <=======get category by id=======>
+	// <======= get category by id =======>
 
 	@Override
-	public CategoryDto getCategoryById(Integer id) {
-		Optional<Category> findByCategory = categoryRepo.findByIdAndIsDeletedFalse(id);
-		if (findByCategory.isPresent()) {
-			Category category = findByCategory.get();
+	public CategoryDto getCategoryById(Integer id) throws Exception {
+		Category category = categoryRepo.findByIdAndIsDeletedFalse(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Category not found with id =" + id));
+		if (!ObjectUtils.isEmpty(category)) { 
+			//if (category.getName() == null) {
+
+				//throw new IllegalArgumentException("name is null");
+			
 			return mapper.map(category, CategoryDto.class);
 		}
 		return null;
 	}
 
-	// <======delete category by id=======>
+	// <======= delete category by id =======>
 
 	@Override
 	public Boolean deleteCategory(Integer id) {
