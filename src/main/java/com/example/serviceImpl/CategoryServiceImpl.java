@@ -13,8 +13,10 @@ import com.example.dto.CategoryDto;
 import com.example.dto.CategoryResponse;
 import com.example.entity.Category;
 import com.example.exception.ResourceNotFoundException;
+import com.example.exception.ValidationException;
 import com.example.repository.CategoryRepository;
 import com.example.service.CategoryService;
+import com.example.util.Validation;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -24,16 +26,18 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Autowired
 	private ModelMapper mapper;
+	
+	@Autowired
+	private Validation validation;
 
 	// <<======= create category =======>>
 	@Override
 	public Boolean saveCategory(CategoryDto categoryDto) {
-
-//		Category category = new Category();
-//		category.setName(categoryDto.getName());
-//		category.setDescription(categoryDto.getDescription());
-//		category.setIsActive(categoryDto.getIsActive ());
-
+		
+		
+		//Validation checking
+		
+		validation.categoryValidation(categoryDto);
 		Category category = mapper.map(categoryDto, Category.class);
 
 		if (ObjectUtils.isEmpty(category.getId())) {
