@@ -3,6 +3,7 @@ package com.example.exception;
 import org.apache.logging.log4j.message.Message;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -34,6 +35,18 @@ public class GlobalExceptionHandler {
 		//log.error("GlobalExceptionHndler :: handleResourceNotFoundException  ::",e.getMessage());
 
 		return new ResponseEntity<>(e.getErrors(),HttpStatus.BAD_REQUEST);
+	}
+	@ExceptionHandler(ExistDataException.class)
+	public ResponseEntity<?> handleExistDataException(ExistDataException e){
+		//log.error("GlobalExceptionHndler :: handleResourceNotFoundException  ::",e.getMessage());
+
+		return new ResponseEntity<>(e.getMessage(),HttpStatus.CONFLICT);
+	}
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	public ResponseEntity<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e){
+		//log.error("GlobalExceptionHndler :: handleResourceNotFoundException  ::",e.getMessage());
+
+		return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 
 }
