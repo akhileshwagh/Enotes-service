@@ -26,23 +26,22 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Autowired
 	private ModelMapper mapper;
-	
+
 	@Autowired
 	private Validation validation;
 
 	// <<======= create category =======>>
 	@Override
 	public Boolean saveCategory(CategoryDto categoryDto) {
-		
-		
-		//Validation checking
-		
+
+		// Validation checking
+
 		validation.categoryValidation(categoryDto);
 		Category category = mapper.map(categoryDto, Category.class);
 
 		if (ObjectUtils.isEmpty(category.getId())) {
 			category.setIsDeleted(false);
-			category.setCreatedBy(2);
+//			category.setCreatedBy(2);
 			category.setCreatedOn(new Date());
 		} else {
 			updateCategory(category);
@@ -62,8 +61,8 @@ public class CategoryServiceImpl implements CategoryService {
 			category.setCreatedOn(existingCategory.getCreatedOn());
 			category.setIsDeleted(existingCategory.getIsDeleted());
 
-			category.setUpdatedBy(1);
-			category.setUpdatedOn(new Date());
+//			category.setUpdatedBy(1);
+//			category.setUpdatedOn(new Date());
 		}
 
 	}
@@ -94,11 +93,11 @@ public class CategoryServiceImpl implements CategoryService {
 	public CategoryDto getCategoryById(Integer id) throws Exception {
 		Category category = categoryRepo.findByIdAndIsDeletedFalse(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Category not found with id =" + id));
-		if (!ObjectUtils.isEmpty(category)) { 
-			//if (category.getName() == null) {
+		if (!ObjectUtils.isEmpty(category)) {
+			// if (category.getName() == null) {
 
-				//throw new IllegalArgumentException("name is null");
-			
+			// throw new IllegalArgumentException("name is null");
+
 			return mapper.map(category, CategoryDto.class);
 		}
 		return null;
