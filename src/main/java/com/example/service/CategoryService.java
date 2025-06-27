@@ -9,7 +9,7 @@ import com.example.entity.Category;
 
 
 public interface CategoryService {
-public Boolean saveCategory(CategoryDto categoryDto);
+public Boolean saveCategory(CategoryDto categoryDto) throws Exception;
 	
 	public List<CategoryDto> getAllCategory();
 

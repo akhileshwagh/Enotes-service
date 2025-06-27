@@ -33,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	// <<======= create category =======>>
 	@Override
-	public Boolean saveCategory(CategoryDto categoryDto) {
+	public Boolean saveCategory(CategoryDto categoryDto) throws Exception {
 
 		// Validation checking
 

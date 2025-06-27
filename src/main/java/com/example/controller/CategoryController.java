@@ -17,8 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.CategoryDto;
 import com.example.dto.CategoryResponse;
-import com.example.entity.Category;
-import com.example.exception.ResourceNotFoundException;
+
 import com.example.service.CategoryService;
 import com.example.util.CommonUtil;
 
@@ -33,7 +32,7 @@ public class CategoryController {
 
 	// <======= create category =======>
 	@PostMapping("/save-category")
-	public ResponseEntity<?> saveCategory(@RequestBody CategoryDto categoryDto) {
+	public ResponseEntity<?> saveCategory(@RequestBody CategoryDto categoryDto) throws Exception {
 		Boolean saveCategory = categoryService.saveCategory(categoryDto);
 		if (saveCategory) {
 			

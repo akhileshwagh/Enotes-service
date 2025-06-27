@@ -18,15 +18,15 @@ public class Validation {
 	// @Autowired
 	// private RoleRepository roleRepo;
 
-	// Autowired
+	// @Autowired
 	// private UserRepository userRepo;
 
-	public void categoryValidation(CategoryDto categoryDto) {
+	public void categoryValidation(CategoryDto categoryDto) throws Exception {
 
 		Map<String, Object> error = new LinkedHashMap<>();
 
 		if (ObjectUtils.isEmpty(categoryDto)) {
-			throw new IllegalArgumentException("category Object/JSON shouldn't be null or empty");
+			throw new Exception("category Object/JSON shouldn't be null or empty");
 		} else {
 
 			// validation name field
