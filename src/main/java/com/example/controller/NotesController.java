@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.dto.NotesResponse;
 import com.example.dto.NotesDto;
 import com.example.entity.FileDetails;
 import com.example.service.NotesService;
@@ -58,6 +59,17 @@ public class NotesController {
 		if (CollectionUtils.isEmpty(notes)) {
 			return ResponseEntity.noContent().build();
 		}
+		return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
+	}
+	
+	@GetMapping("/user-notes")
+	public ResponseEntity<?> getAllNotesByUser(@RequestParam(name = "pageNo", defaultValue = "0") Integer pageNo,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+		Integer userId = 5;
+		NotesResponse notes = notesService.getAllNotesByUser(userId,pageNo,pageSize);
+//		if (CollectionUtils.isEmpty(notes)) {
+//			return ResponseEntity.noContent().build();
+//		}
 		return CommonUtil.createBuildResponse(notes, HttpStatus.OK);
 	}
 
