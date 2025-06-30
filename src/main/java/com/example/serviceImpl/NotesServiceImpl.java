@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import com.example.dto.CategoryDto;
 import com.example.dto.NotesDto;
+import com.example.dto.NotesDto.FilesDto;
 import com.example.entity.FileDetails;
 import com.example.entity.Notes;
 import com.example.exception.ResourceNotFoundException;
@@ -33,6 +34,7 @@ import com.example.repository.NotesRepository;
 import com.example.service.NotesService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.dto.NotesResponse;
+
 @Service
 public class NotesServiceImpl implements NotesService {
 
@@ -57,18 +59,26 @@ public class NotesServiceImpl implements NotesService {
 		ObjectMapper ob = new ObjectMapper();
 		NotesDto notesDto = ob.readValue(notes, NotesDto.class);
 
+		// update notes if id is given in request
+		if (!ObjectUtils.isEmpty(notesDto.getId())) {
+			updateNotes(notesDto, file);
+		}
+
 		// category validation
 		checkCategoryExist(notesDto.getCategory());
 
 		Notes notesMap = mapper.map(notesDto, Notes.class);
-	
-		//file saving in notes
+
+		// file saving in notes
 		FileDetails fileDtls = saveFileDetails(file);
 
 		if (!ObjectUtils.isEmpty(fileDtls)) {
 			notesMap.setFileDetails(fileDtls);
 		} else {
-			notesMap.setFileDetails(null);
+			// notesMap.setFileDetails(null);
+			if (ObjectUtils.isEmpty(notesDto.getId())) {
+				notesMap.setFileDetails(null);
+			}
 		}
 
 		Notes saveNotes = notesRepo.save(notesMap);
@@ -76,6 +86,18 @@ public class NotesServiceImpl implements NotesService {
 			return true;
 		}
 		return false;
+	}
+
+	private void updateNotes(NotesDto notesDto, MultipartFile file) throws Exception {
+
+		Notes existNotes = notesRepo.findById(notesDto.getId())
+				.orElseThrow(() -> new ResourceNotFoundException("Invalid Notes id"));
+
+		// user not choose any file at update time
+		if (ObjectUtils.isEmpty(file)) {
+			notesDto.setFileDetails(mapper.map(existNotes.getFileDetails(), FilesDto.class));
+		}
+
 	}
 
 	private FileDetails saveFileDetails(MultipartFile file) throws IOException {
@@ -144,7 +166,7 @@ public class NotesServiceImpl implements NotesService {
 	public List<NotesDto> getAllNotes() {
 		return notesRepo.findAll().stream().map(note -> mapper.map(note, NotesDto.class)).toList();
 	}
-	
+
 	@Override
 	public byte[] downloadFile(FileDetails fileDetails) throws Exception {
 
@@ -163,16 +185,16 @@ public class NotesServiceImpl implements NotesService {
 	@Override
 	public NotesResponse getAllNotesByUser(Integer userId, Integer pageNo, Integer pageSize) {
 		// 10 = 5,5 = 2 pages
-				Pageable pageable = PageRequest.of(pageNo, pageSize);
-				Page<Notes> pageNotes = notesRepo.findByCreatedBy(userId, pageable);
+		Pageable pageable = PageRequest.of(pageNo, pageSize);
+		Page<Notes> pageNotes = notesRepo.findByCreatedBy(userId, pageable);
 
-				List<NotesDto> notesDto = pageNotes.get().map(n -> mapper.map(n, NotesDto.class)).toList();
+		List<NotesDto> notesDto = pageNotes.get().map(n -> mapper.map(n, NotesDto.class)).toList();
 
-				NotesResponse notes = NotesResponse.builder().notes(notesDto).pageNo(pageNotes.getNumber())
-						.pageSize(pageNotes.getSize()).totalElements(pageNotes.getTotalElements())
-						.totalPages(pageNotes.getTotalPages()).isFirst(pageNotes.isFirst()).isLast(pageNotes.isLast()).build();
+		NotesResponse notes = NotesResponse.builder().notes(notesDto).pageNo(pageNotes.getNumber())
+				.pageSize(pageNotes.getSize()).totalElements(pageNotes.getTotalElements())
+				.totalPages(pageNotes.getTotalPages()).isFirst(pageNotes.isFirst()).isLast(pageNotes.isLast()).build();
 
-				return notes;
+		return notes;
 	}
 
 }
