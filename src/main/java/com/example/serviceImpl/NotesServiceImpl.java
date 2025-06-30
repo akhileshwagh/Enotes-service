@@ -6,9 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
@@ -25,7 +23,6 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import com.example.dto.CategoryDto;
 import com.example.dto.FavouriteNoteDto;
 import com.example.dto.NotesDto;
 import com.example.dto.NotesDto.FilesDto;
