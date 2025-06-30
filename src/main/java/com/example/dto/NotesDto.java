@@ -2,6 +2,7 @@ package com.example.dto;
 
 
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import lombok.AllArgsConstructor;
@@ -35,7 +36,7 @@ public class NotesDto {
 	
 	private Boolean isDeleted;
 
-	private Date deletedOn;
+	private LocalDateTime deletedOn;
 
 	@Getter
 	@Setter
