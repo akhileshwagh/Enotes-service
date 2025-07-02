@@ -5,10 +5,17 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import com.example.config.security.CustomUserDetails;
 import com.example.dto.EmailRequest;
+import com.example.dto.LoginRequest;
+import com.example.dto.LoginResponse;
 import com.example.dto.UserDto;
 import com.example.entity.AccountStatus;
 import com.example.entity.Role;
@@ -35,6 +42,13 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private EmailService emailService;
+	
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
 
 	@Override
 	public Boolean register(UserDto userDto,String url) throws Exception {
@@ -51,6 +65,8 @@ public class UserServiceImpl implements UserService {
 				.build();
 		user.setStatus(status);
 
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		
 		User saveUser = userRepo.save(user);
 		if (!ObjectUtils.isEmpty(saveUser)) {
 
@@ -88,4 +104,26 @@ public class UserServiceImpl implements UserService {
 		user.setRoles(roles);
 	}
 
+	@Override
+	public LoginResponse login(LoginRequest loginRequest) {
+
+		Authentication authenticate = authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+
+		if(authenticate.isAuthenticated())
+		{
+			CustomUserDetails customUserDetails= 
+					(CustomUserDetails)authenticate.getPrincipal();
+			
+			String token="safdghhfdssaghnggsdsgfvswaefqwaef";
+			
+			LoginResponse loginResponse=LoginResponse.builder()
+					.user(mapper.map(customUserDetails.getUser(), UserDto.class))
+					.token(token)
+					.build();
+			return loginResponse;
+		}
+		
+		return null;
+	}
 }
