@@ -22,6 +22,7 @@ import com.example.entity.Role;
 import com.example.entity.User;
 import com.example.repository.RoleRepository;
 import com.example.repository.UserRepository;
+import com.example.service.JwtService;
 import com.example.service.UserService;
 import com.example.util.Validation;
 
@@ -39,39 +40,39 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private ModelMapper mapper;
-	
+
 	@Autowired
 	private EmailService emailService;
-	
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
-	
+
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
 
+	@Autowired
+	private JwtService jwtService;
+
 	@Override
-	public Boolean register(UserDto userDto,String url) throws Exception {
+	public Boolean register(UserDto userDto, String url) throws Exception {
 
 		validation.userValidation(userDto);
-		
+
 		User user = mapper.map(userDto, User.class);
 
 		setRole(userDto, user);
-		
-		AccountStatus status=AccountStatus.builder()
-				.isActive(false)
-				.verificationCode(UUID.randomUUID().toString())
+
+		AccountStatus status = AccountStatus.builder().isActive(false).verificationCode(UUID.randomUUID().toString())
 				.build();
 		user.setStatus(status);
 
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		
+
 		User saveUser = userRepo.save(user);
 		if (!ObjectUtils.isEmpty(saveUser)) {
 
 			// send email
-			emailSend(saveUser,url);
+			emailSend(saveUser, url);
 
 			return true;
 		}
@@ -80,21 +81,16 @@ public class UserServiceImpl implements UserService {
 
 	private void emailSend(User saveUser, String url) throws Exception {
 
-		String message = "Hi,<b>[[username]]</b> " + "<br> "
-				+ "Your account register sucessfully.<br>"
-				+ "<br> Click the below link verify & Active your account <br>" 
-				+ "<a href='[[url]]'>Click Here</a> <br><br>"
-				+ "Thanks,<br>Enotes.com";
-		
-		message=message.replace("[[username]]", saveUser.getFirstName());
-		message=message.replace("[[url]]", url+"/api/v1/home/verify?uid="+saveUser.getId()+"&&code="+saveUser.getStatus().getVerificationCode());
+		String message = "Hi,<b>[[username]]</b> " + "<br> " + "Your account register sucessfully.<br>"
+				+ "<br> Click the below link verify & Active your account <br>"
+				+ "<a href='[[url]]'>Click Here</a> <br><br>" + "Thanks,<br>Enotes.com";
 
+		message = message.replace("[[username]]", saveUser.getFirstName());
+		message = message.replace("[[url]]", url + "/api/v1/home/verify?uid=" + saveUser.getId() + "&&code="
+				+ saveUser.getStatus().getVerificationCode());
 
-		EmailRequest emailRequest = EmailRequest.builder()
-				.to(saveUser.getEmail())
-				.title("Account Creating Confirmation")
-				.subject("Account Created Success")
-				.message(message).build();
+		EmailRequest emailRequest = EmailRequest.builder().to(saveUser.getEmail())
+				.title("Account Creating Confirmation").subject("Account Created Success").message(message).build();
 		emailService.sendEmail(emailRequest);
 	}
 
@@ -110,20 +106,17 @@ public class UserServiceImpl implements UserService {
 		Authentication authenticate = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
-		if(authenticate.isAuthenticated())
-		{
-			CustomUserDetails customUserDetails= 
-					(CustomUserDetails)authenticate.getPrincipal();
-			
-			String token="safdghhfdssaghnggsdsgfvswaefqwaef";
-			
-			LoginResponse loginResponse=LoginResponse.builder()
-					.user(mapper.map(customUserDetails.getUser(), UserDto.class))
-					.token(token)
-					.build();
+		if (authenticate.isAuthenticated()) {
+			CustomUserDetails customUserDetails = (CustomUserDetails) authenticate.getPrincipal();
+
+			//String token = "";
+			String token=jwtService.generateToken(customUserDetails.getUser());
+
+			LoginResponse loginResponse = LoginResponse.builder()
+					.user(mapper.map(customUserDetails.getUser(), UserDto.class)).token(token).build();
 			return loginResponse;
 		}
-		
+
 		return null;
 	}
 }
